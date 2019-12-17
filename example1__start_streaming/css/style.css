@@ -1,0 +1,6 @@
+video.videoElement {
+    width: 960px;
+    height: auto;
+    
+    border: 2px black solid;
+}

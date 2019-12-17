@@ -1,0 +1,102 @@
+<html>
+    <head>
+	<link href="css/style.css" rel="stylesheet" />
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+	<script type="text/javascript">
+	    let video_localStream;
+	    let button_startStream;
+	    let button_stopStream;
+	    let button_playOrPauseStream;
+	    let stream_local = null;
+
+	    function startScreenSharing() {
+		return navigator.mediaDevices.getDisplayMedia({video: true});
+	    }
+
+	    function _startStreaming() {
+		console.log("Start streaming...");
+
+		var promise = startScreenSharing();
+		promise.then(
+		    function(value) {
+			stream_local = value;
+
+			video_localStream.srcObject = stream_local;
+			video_localStream.play();
+
+			$(button_startStream).prop("disabled", true);
+			$(button_stopStream).prop("disabled", false);
+			$(button_playOrPauseStream).prop("disabled", false);
+
+			console.log("Stream started!");
+		    },
+ 
+		    function(error) {
+			console.log("Error while start streaming: " + error);
+		    }
+		);
+	    }
+
+	    function _stopStreaming() {
+		console.log("Stop streaming...");
+
+		if (null != stream_local) {
+		    stream_local.getTracks().forEach(track => track.stop());
+		}
+
+		$(button_startStream).prop("disabled", false);
+		$(button_stopStream).prop("disabled", true);
+		$(button_playOrPauseStream).prop("disabled", true);
+
+		stream_local = null;
+
+		console.log("Stream stopped!");
+	    }
+
+	    function _playOrPauseStreaming() {
+		console.log("Pause streaming...");
+		
+		if (null != stream_local && !video_localStream.paused) {
+		    video_localStream.pause();
+		} else if (null != stream_local && video_localStream.paused) {
+		    video_localStream.play();
+		} else {
+		    $(button_startStream).prop("disabled", false);
+		    $(button_stopStream).prop("disabled", true);
+		    $(button_playOrPauseStream).prop("disabled", true);
+
+		    return;
+		}
+		
+		$(button_playOrPauseStream).prop("disabled", false);
+		$(button_startStream).prop("disabled", true);
+		$(button_stopStream).prop("disabled", false);
+	    }
+
+	    $(document).ready(function() {
+		console.log("Document ready!");
+
+		video_localStream = document.getElementById("video_localStream");
+
+		button_startStream = document.getElementById("button_startStream");
+		button_stopStream = document.getElementById("button_stopStream");
+		button_playOrPauseStream = document.getElementById("button_playOrPauseStream");
+
+		$(button_startStream).click(_startStreaming);
+		$(button_stopStream).click(_stopStreaming);
+		$(button_playOrPauseStream).click(_playOrPauseStreaming);
+	    });
+	</script>
+    </head>
+    <body>
+	<h1>Example1 - Start streaming</h1>
+	<video id="video_localStream" class="videoElement" controls="true"></video>
+	<table>
+	    <tr>
+		<td><button id="button_startStream">Start streaming</button></td>
+		<td><button id="button_playOrPauseStream">Play/Pause streaming</button></td>
+		<td><button id="button_stopStream">Stop streaming</button></td>
+	    </tr>
+	</table>
+    </body>
+</html>
